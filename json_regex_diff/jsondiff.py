@@ -353,8 +353,7 @@ class JsonDiff(object):
                     try:
                         json2_keys.remove(key)
                     except AttributeError as e:
-                        print(json2_keys)
-                        raise
+                        raise Exception(json2_keys)
                 else:
                     # key in json1 that is not in json2
                     # expand that k-v pair into diff

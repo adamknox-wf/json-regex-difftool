@@ -350,7 +350,11 @@ class JsonDiff(object):
                 if key in json2_keys:
                     # match
                     matched_keys.append(key)
-                    json2_keys.remove(key)
+                    try:
+                        json2_keys.remove(key)
+                    except AttributeError as e:
+                        print(json2_keys)
+                        raise
                 else:
                     # key in json1 that is not in json2
                     # expand that k-v pair into diff

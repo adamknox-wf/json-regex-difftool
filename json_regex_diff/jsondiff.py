@@ -339,8 +339,8 @@ class JsonDiff(object):
         # Depth greater > 0 indicates we should compare keys
         # Negative depth means continuously recursively search
         if not depth == 0:
-            json1_keys = _json1.keys()
-            json2_keys = _json2.keys()
+            json1_keys = list(_json1.keys())
+            json2_keys = list(_json2.keys())
             matched_keys = []
             for key in json1_keys:
                 if len(path) == 0:
@@ -350,10 +350,7 @@ class JsonDiff(object):
                 if key in json2_keys:
                     # match
                     matched_keys.append(key)
-                    try:
-                        json2_keys.remove(key)
-                    except AttributeError as e:
-                        raise Exception(json2_keys)
+                    json2_keys.remove(key)
                 else:
                     # key in json1 that is not in json2
                     # expand that k-v pair into diff

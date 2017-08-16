@@ -223,8 +223,8 @@ class JsonDiff(object):
         json_keys = []
         model_keys = []
         if type(json_input) is dict and type(model) is dict:
-            json_keys = json_input.keys()
-            model_keys = model.keys()
+            json_keys = list(json_input.keys())
+            model_keys = list(model.keys())
         elif type(json_input) is list and type(model) is list:
             return self._lists_equal(json_input, model)
         elif type(json_input) is not type(model):
@@ -479,7 +479,7 @@ class JsonDiff(object):
             '   best match
             '     - In case of tie, lowest index wins
             '''
-            indices = index_to_irrelevance.keys()
+            indices = list(index_to_irrelevance.keys())
             if len(indices) == 0:
                 break
             indices.sort()

@@ -6,6 +6,16 @@ import os
 import re
 import copy
 
+
+try:
+    decoded_string_type = unicode
+except NameError:
+    encoded_string_type = bytes
+    decoded_string_type = str
+else:
+    encoded_string_type = str
+
+
 class JsonDiff(object):
     def __init__(self, new_json, model_map, logger=logging.getLogger(),
                  is_directory=False, list_depth=0):
@@ -187,7 +197,7 @@ class JsonDiff(object):
                 if not self._lists_equal(json_list[index], regex_list[index]):
                     return False
 
-            elif type(json_list[index]) is unicode:
+            elif type(json_list[index]) is decoded_string_type:
                 # regex match
                 if not re.match(regex_list[index], json_list[index]):
                     return False
@@ -252,7 +262,7 @@ class JsonDiff(object):
                                          model[key]):
                     return False
 
-            elif type(model[key]) is unicode:
+            elif type(model[key]) is decoded_string_type:
                 if not re.match(model[key], json_input.get(key_matches[key])):
                     return False
 
@@ -276,16 +286,16 @@ class JsonDiff(object):
 
     def diff_model(self, _json1, _json2, path='', depth=-1):
         if not type(_json1) == type(_json2):
-            if type(_json2) is unicode and type(_json1) not in [list, dict]:
+            if type(_json2) is decoded_string_type and type(_json1) not in [list, dict]:
                 # Potential regex match
                 self._diff_json_item(_json1, _json2, path, True)
             else:
                 self.difference.append('TypeDifference : {} - {}:'
                                        ' ({}), {}: ({})'
                                        .format(path, type(_json1).__name__,
-                                               str(_json1),
+                                               encoded_string_type(_json1),
                                                type(_json2).__name__,
-                                               str(_json2)))
+                                               encoded_string_type(_json2)))
         else:
             # they are the same type
             # Three choices: dict, list, item
@@ -323,8 +333,8 @@ class JsonDiff(object):
             self.difference.append('TypeDifference : {} - is {}: ({}),'
                                    ' but was {}: ({})'
                                    .format(path, type(_json1).__name__,
-                                           str(_json1), type(_json2).__name__,
-                                           str(_json2)))
+                                           encoded_string_type(_json1), type(_json2).__name__,
+                                           encoded_string_type(_json2)))
         else:
             # they are the same type
             # Three choices: dict, list, item
@@ -408,7 +418,7 @@ class JsonDiff(object):
                     _json2.remove(_json2[cur_index])
                     break
                 elif use_regex and type(item) not in [list, dict]:
-                    if type(_json2[cur_index]) is unicode:
+                    if type(_json2[cur_index]) is decoded_string_type:
                         # we can use as a pattern though item could be an
                         # integer say
                         match = re.match(_json2[cur_index], str(item))
@@ -518,12 +528,12 @@ class JsonDiff(object):
             original_index = (original_index + 1) % len(json2_original)
 
     def _diff_json_item(self, _json1, _json2, path, use_regex):
-        if type(_json1) is unicode:
+        if type(_json1) is decoded_string_type:
             _json1 = _json1.encode('ascii', 'ignore')
-        if type(_json2) is unicode:
+        if type(_json2) is decoded_string_type:
             _json2 = _json2.encode('ascii', 'ignore')
-        if use_regex and type(_json2) is str:
-            match = re.match(_json2, str(_json1))
+        if use_regex and type(_json2) is encoded_string_type:
+            match = re.match(_json2, encoded_string_type(_json1))
             if not match:
                 self.difference.append(
                     'Changed: {} to {} from {}'.format(path, _json1, _json2))
@@ -558,7 +568,7 @@ class JsonDiff(object):
                 else:
                     new_path = "{}.{}".format(path, key)
                 if type(blob[key]) not in [list, dict]:
-                    if type(blob[key]) is unicode:
+                    if type(blob[key]) is decoded_string_type:
                         self.difference.append(
                             '{}: {}={}'.format(c, new_path,
                                                blob[key].encode('ascii',
@@ -579,7 +589,7 @@ class JsonDiff(object):
                 new_path = "{}[{}]".format(path, index)
                 if type(blob[index]) in (list, dict):
                     self._expand_diff(item[index], new_path, new_item)
-                    if type(blob[index]) is unicode:
+                    if type(blob[index]) is decoded_string_type:
                         self.difference.append(
                             '{}: {}={}'.format(c, new_path,
                                                blob[index].encode('ascii',
